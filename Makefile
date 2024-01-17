@@ -1,0 +1,30 @@
+OBJS := main.o
+DEPS := $(OBJS:.o=.d)
+TARGET := ./out
+
+EXTRA_FLAGS ?= -O2
+
+CPPFLAGS := -MMD -MP
+CXXFLAGS := -Wall -Wextra -Wpedantic $(EXTRA_FLAGS)
+CFLAGS := $(CXXFLAGS)
+LDFLAGS :=
+
+$(TARGET): $(OBJS)
+	$(CXX) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+.PHONY: clean run gdb
+
+clean:
+	-rm -f *.d
+	-rm -f *.o
+	-rm -f $(TARGET)
+
+run: $(TARGET)
+	$(TARGET)
+
+gdb:
+	make clean
+	EXTRA_FLAGS=-g make $(TARGET)
+	gdb $(TARGET)
+
+-include $(DEPS)
