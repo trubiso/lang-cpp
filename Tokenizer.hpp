@@ -22,8 +22,17 @@ private:
 
 	constexpr inline bool is_index_valid() const noexcept { return m_index < m_source->size(); }
 
+	constexpr static inline bool is_whitespace(char x) noexcept {
+		return x == ' ' || x == '\n' || x == '\t';
+	}
+
 	void consume_whitespace() noexcept;
-	Token consume_identifier() noexcept;
+	std::optional<Token> consume_identifier() noexcept;
+	std::optional<Token> consume_number_literal() noexcept;
+	std::optional<Token> consume_string_literal() noexcept;
+	std::optional<Token> consume_char_literal() noexcept;
+	std::optional<Token> consume_operator() noexcept;
+	std::optional<Token> consume_punctuation() noexcept;
 
 	std::string const *m_source;
 	size_t m_index;
