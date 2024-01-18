@@ -1,11 +1,11 @@
-OBJS := main.o
+OBJS := main.o Token.o Tokenizer.o Util.o
 DEPS := $(OBJS:.o=.d)
 TARGET := ./out
 
 EXTRA_FLAGS ?= -O2
 
 CPPFLAGS := -MMD -MP
-CXXFLAGS := -Wall -Wextra -Wpedantic $(EXTRA_FLAGS)
+CXXFLAGS := -Wall -Wextra -Wpedantic $(EXTRA_FLAGS) -std=c++20
 CFLAGS := $(CXXFLAGS)
 LDFLAGS :=
 

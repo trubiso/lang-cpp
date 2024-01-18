@@ -1,3 +1,5 @@
+#include <string>
+
 #include "Span.hpp"
 
 struct Token {
@@ -11,4 +13,6 @@ struct Token {
 	} kind;
 
 	Span span;
+
+	std::string value(std::string const &source) const;
 };

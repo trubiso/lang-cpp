@@ -6,6 +6,7 @@ std::optional<Token> Tokenizer::next() {
 	consume_whitespace();
 	if (!current().has_value()) return {};
 	if (std::isalpha(current().value())) return consume_identifier();
+	return {};
 }
 
 void Tokenizer::consume_whitespace() noexcept {
@@ -19,6 +20,6 @@ Token Tokenizer::consume_identifier() noexcept {
 	while (is_index_valid() && std::isalnum(current().value())) {
 		advance();
 	}
-	size_t end = m_index - 1;
+	size_t end = m_index;
 	return Token{.kind = Token::Kind::IDENTIFIER, .span = Span{.start = start, .end = end}};
 }

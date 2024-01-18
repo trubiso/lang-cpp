@@ -15,7 +15,7 @@
 		str << file.rdbuf();
 		file.close();
 		content = str.str();
-	} catch (std::ifstream::failure err) {
+	} catch (std::ifstream::failure const &err) {
 		// TODO: proper logging
 		std::cout << "[ERROR] Couldn't read file " << path << "\n" << err.what() << std::endl;
 	}

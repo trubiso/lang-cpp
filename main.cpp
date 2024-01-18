@@ -6,6 +6,6 @@ int main() {
 	std::cout << "Hello, world!" << std::endl;
 	auto code = read_file("code");
 	auto tokenizer = Tokenizer(&code);
-	std::cout << tokenizer.next().value().span.end;
+	std::cout << tokenizer.next().value().value(code) << std::endl;
 	return 0;
 }
