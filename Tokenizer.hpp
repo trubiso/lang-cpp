@@ -1,16 +1,16 @@
 #include <optional>
-#include <string_view>
+#include <string>
 
 #include "Token.hpp"
 
 class Tokenizer {
 public:
-	Tokenizer(std::string_view const *source) : m_source(source), m_index(0) {}
+	Tokenizer(std::string const *source) : m_source(source), m_index(0) {}
 
 	[[nodiscard]] std::optional<Token> next() noexcept;
 
 private:
-	[[nodiscard]] constexpr inline std::optional<char const> current() const noexcept {
+	[[nodiscard]] constexpr inline std::optional<std::reference_wrapper<char const>> current() const noexcept {
 		if (!is_index_valid()) return {};
 		return m_source->at(m_index);
 	}
@@ -33,6 +33,6 @@ private:
 	[[nodiscard]] std::optional<Token> consume_operator() noexcept;
 	[[nodiscard]] std::optional<Token> consume_punctuation() noexcept;
 
-	std::string_view const *m_source;
+	std::string const *m_source;
 	size_t m_index;
 };

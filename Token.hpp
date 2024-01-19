@@ -1,4 +1,4 @@
-#include <string_view>
+#include <string>
 
 #include "Span.hpp"
 
@@ -14,5 +14,5 @@ struct Token {
 
 	Span span;
 
-	std::string_view value(std::string_view const &source) const;
+	std::string value(std::string const &source) const;
 };

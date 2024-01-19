@@ -1,3 +1,3 @@
-#include <string_view>
+#include <string>
 
-[[nodiscard]] std::string_view read_file(char const *path) noexcept;
+[[nodiscard]] std::string read_file(char const *path) noexcept;
