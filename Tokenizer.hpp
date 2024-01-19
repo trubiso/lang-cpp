@@ -29,8 +29,7 @@ private:
 	void consume_whitespace() noexcept;
 	std::optional<Token> consume_identifier() noexcept;
 	std::optional<Token> consume_number_literal() noexcept;
-	std::optional<Token> consume_string_literal() noexcept;
-	std::optional<Token> consume_char_literal() noexcept;
+	std::optional<Token> consume_wrapped_literal(char wrap, Token::Kind kind) noexcept;
 	std::optional<Token> consume_operator() noexcept;
 	std::optional<Token> consume_punctuation() noexcept;
 

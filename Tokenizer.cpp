@@ -8,9 +8,9 @@ std::optional<Token> Tokenizer::next() {
 	if (std::isalpha(current().value())) return consume_identifier();
 	switch (current().value()) {
 	case '"':
-		return consume_string_literal();
+		return consume_wrapped_literal('"', Token::Kind::STRING_LITERAL);
 	case '\'':
-		return consume_char_literal();
+		return consume_wrapped_literal('\'', Token::Kind::CHAR_LITERAL);
 	case '+':
 	case '-':
 	case '*':
@@ -23,7 +23,7 @@ std::optional<Token> Tokenizer::next() {
 	case '<':
 	case '>':
 	case '!':
-	case '?': // FIXME: disallow ?= (what even is that)
+	case '?':  // FIXME: disallow ?= (what even is that)
 		return consume_operator();
 	// TODO: arrows (must be handled in operators)
 	case '(':
@@ -61,24 +61,16 @@ std::optional<Token> Tokenizer::consume_number_literal() noexcept {
 	return {};
 }
 
-std::optional<Token> Tokenizer::consume_string_literal() noexcept {
+std::optional<Token> Tokenizer::consume_wrapped_literal(char wrap, Token::Kind kind) noexcept {
 	size_t start = m_index;
-	advance();  // consume "
-	while (is_index_valid() && current().value() != '"') advance();
-	advance();                           // consume "
+	advance();  // consume wrap character
+	while (is_index_valid() && current().value() != wrap) advance();
+	if (!is_index_valid()) return {};    // if we didn't reach the wrap character, there's no token
+	// TODO: log unterminated wrapped literal error
+	advance();                           // consume wrap character
 	std::ignore = consume_identifier();  // just in case it ends with a postfix
 	size_t end = m_index;
-	return Token{.kind = Token::Kind::STRING_LITERAL, .span = Span{.start = start, .end = end}};
-}
-
-std::optional<Token> Tokenizer::consume_char_literal() noexcept {
-	size_t start = m_index;
-	advance();  // consume '
-	while (is_index_valid() && current().value() != '\'') advance();
-	advance();                           // consume '
-	std::ignore = consume_identifier();  // just in case it ends with a postfix
-	size_t end = m_index;
-	return Token{.kind = Token::Kind::CHAR_LITERAL, .span = Span{.start = start, .end = end}};
+	return Token{.kind = kind, .span = Span{.start = start, .end = end}};
 }
 
 std::optional<Token> Tokenizer::consume_operator() noexcept {
@@ -103,7 +95,7 @@ std::optional<Token> Tokenizer::consume_operator() noexcept {
 std::optional<Token> Tokenizer::consume_punctuation() noexcept {
 	size_t start = m_index;
 	char first_char = current().value();
-	advance(); // consume the first punctuation symbol
+	advance();  // consume the first punctuation symbol
 	if (is_index_valid()) {
 		switch (current().value()) {
 		case ':':
