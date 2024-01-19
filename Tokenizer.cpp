@@ -2,7 +2,7 @@
 
 #include <cctype>
 
-std::optional<Token> Tokenizer::next() {
+[[nodiscard]] std::optional<Token> Tokenizer::next() noexcept {
 	consume_whitespace();
 	if (!current().has_value()) return {};
 	if (std::isalpha(current().value())) return consume_identifier();
@@ -48,7 +48,7 @@ void Tokenizer::consume_whitespace() noexcept {
 	}
 }
 
-std::optional<Token> Tokenizer::consume_identifier() noexcept {
+[[nodiscard]] std::optional<Token> Tokenizer::consume_identifier() noexcept {
 	size_t start = m_index;
 	while (is_index_valid() && std::isalnum(current().value())) {
 		advance();
@@ -57,7 +57,7 @@ std::optional<Token> Tokenizer::consume_identifier() noexcept {
 	return Token{.kind = Token::Kind::IDENTIFIER, .span = Span{.start = start, .end = end}};
 }
 
-std::optional<Token> Tokenizer::consume_number_literal() noexcept {
+[[nodiscard]] std::optional<Token> Tokenizer::consume_number_literal() noexcept {
 	// TODO: be stricter
 	size_t start = m_index;
 	while (is_index_valid() && (std::isdigit(current().value()) || current().value() == '_'))
@@ -76,24 +76,24 @@ std::optional<Token> Tokenizer::consume_number_literal() noexcept {
 	}
 	while (is_index_valid() && (std::isxdigit(current().value()) || current().value() == '_'))
 		advance();
-	std::ignore = consume_identifier();  // just in case it ends with a postfix
+	consume_identifier();  // just in case it ends with a postfix
 	size_t end = m_index;
 	return Token{.kind = Token::Kind::NUMBER_LITERAL, .span = Span{.start = start, .end = end}};
 }
 
-std::optional<Token> Tokenizer::consume_wrapped_literal(char wrap, Token::Kind kind) noexcept {
+[[nodiscard]] std::optional<Token> Tokenizer::consume_wrapped_literal(char wrap, Token::Kind kind) noexcept {
 	size_t start = m_index;
 	advance();  // consume wrap character
 	while (is_index_valid() && current().value() != wrap) advance();
 	if (!is_index_valid()) return {};  // if we didn't reach the wrap character, there's no token
 	// TODO: log unterminated wrapped literal error
 	advance();                           // consume wrap character
-	std::ignore = consume_identifier();  // just in case it ends with a postfix
+	consume_identifier();  // just in case it ends with a postfix
 	size_t end = m_index;
 	return Token{.kind = kind, .span = Span{.start = start, .end = end}};
 }
 
-std::optional<Token> Tokenizer::consume_operator() noexcept {
+[[nodiscard]] std::optional<Token> Tokenizer::consume_operator() noexcept {
 	size_t start = m_index;
 	char first_char = current().value();
 	advance();  // consume the first operator symbol
@@ -112,7 +112,7 @@ std::optional<Token> Tokenizer::consume_operator() noexcept {
 	return Token{.kind = Token::Kind::OPERATOR, .span = Span{.start = start, .end = end}};
 }
 
-std::optional<Token> Tokenizer::consume_punctuation() noexcept {
+[[nodiscard]] std::optional<Token> Tokenizer::consume_punctuation() noexcept {
 	size_t start = m_index;
 	char first_char = current().value();
 	advance();  // consume the first punctuation symbol

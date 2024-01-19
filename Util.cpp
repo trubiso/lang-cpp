@@ -4,8 +4,8 @@
 #include <iostream>
 #include <sstream>
 
-[[nodiscard]] std::string read_file(char const *path) noexcept {
-	std::string content;
+[[nodiscard]] std::string_view read_file(char const *path) noexcept {
+	std::string_view content;
 	std::ifstream file;
 	file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
