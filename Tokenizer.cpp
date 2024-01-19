@@ -1,6 +1,7 @@
 #include "Tokenizer.hpp"
 
 #include <cctype>
+#include <tuple>
 
 [[nodiscard]] std::optional<Token> Tokenizer::next() noexcept {
 	consume_whitespace();
@@ -26,7 +27,6 @@
 	case '!':
 	case '?':  // FIXME: disallow ?= (what even is that)
 		return consume_operator();
-	// TODO: arrows (must be handled in operators)
 	case '(':
 	case ')':
 	case '[':
@@ -76,7 +76,7 @@ void Tokenizer::consume_whitespace() noexcept {
 	}
 	while (is_index_valid() && (std::isxdigit(current().value()) || current().value() == '_'))
 		advance();
-	consume_identifier();  // just in case it ends with a postfix
+	std::ignore = consume_identifier();  // just in case it ends with a postfix
 	size_t end = m_index;
 	return Token{.kind = Token::Kind::NUMBER_LITERAL, .span = Span{.start = start, .end = end}};
 }
@@ -88,7 +88,7 @@ void Tokenizer::consume_whitespace() noexcept {
 	if (!is_index_valid()) return {};  // if we didn't reach the wrap character, there's no token
 	// TODO: log unterminated wrapped literal error
 	advance();                           // consume wrap character
-	consume_identifier();  // just in case it ends with a postfix
+	std::ignore = consume_identifier();  // just in case it ends with a postfix
 	size_t end = m_index;
 	return Token{.kind = kind, .span = Span{.start = start, .end = end}};
 }
@@ -103,8 +103,13 @@ void Tokenizer::consume_whitespace() noexcept {
 		case '&':
 			if (first_char == current().value()) advance();
 			break;
+		case '>':
+			if (first_char != '-' && first_char != '=') break;
+			advance(); // this is an arrow
+			size_t end = m_index;
+			return Token{.kind = Token::Kind::PUNCTUATION, .span = Span{.start = start, .end = end}};
 		}
-		if (is_index_valid() && current().value() == '=') {
+		if (is_index_valid() && current().value() == '=' && first_char != '?') {
 			advance();
 		}
 	}
