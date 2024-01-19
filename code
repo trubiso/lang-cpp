@@ -4,3 +4,7 @@ let a = 3.14159; let b = 0xdead_beef.fbfbfp7;
 let c = 0.5f32;
 let d = "
 let k = 9;
+
+
+bib
+"; // hi

@@ -22,7 +22,7 @@ public:
 
 	constexpr inline Severity get_severity() const { return severity; }
 
-	void print() const;
+	void print(std::string const *code) const;
 
 private:
 	Severity severity;

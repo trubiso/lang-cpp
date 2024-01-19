@@ -13,8 +13,9 @@ int main() {
 		std::cout << next.value().value(code) << std::endl;
 	}
 	Diagnostic diag1(Diagnostic::Severity::Warning, "i am warning you!!", "just so you know");
-	diag1.print();
+	diag1.add_label(Span {.start = 128, .end = code.size() - 6}, "eugh");
+	diag1.print(&code);
 	Diagnostic diag2(Diagnostic::Severity::Error, "that was unfortunate");
-	diag2.print();
+	diag2.print(&code);
 	return 0;
 }
