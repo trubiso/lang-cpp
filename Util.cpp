@@ -22,3 +22,17 @@
 
 	return content;
 }
+
+void out_fmt_bold() { std::cout << "\e[1m"; }
+void out_fmt_dim() { std::cout << "\e[2m"; }
+void out_fmt_italic() { std::cout << "\e[3m"; }
+void out_fmt_underline() { std::cout << "\e[4m"; }
+void out_fmt_blink() { std::cout << "\e[5m"; }
+void out_fmt_reverse() { std::cout << "\e[7m"; }
+void out_fmt_hidden() { std::cout << "\e[8m"; }
+void out_fmt_strikethrough() { std::cout << "\e[9m"; }
+void out_fmt_reset() { std::cout << "\e[0m"; }
+
+// TODO: make this good
+void out_fmt_color_fg(uint8_t c) { std::cout << "\e[38;5;" << (uint32_t)c << "m"; }
+void out_fmt_color_bg(uint8_t c) { std::cout << "\e[48;5;" << (uint32_t)c << "m"; }
