@@ -3,6 +3,7 @@
 #include "Tokenizer/Tokenizer.hpp"
 #include "Util.hpp"
 #include "Parser/Primitive.hpp"
+#include "Parser/Combinator.hpp"
 
 int main() {
 	auto code = read_file("code");

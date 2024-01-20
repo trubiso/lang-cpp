@@ -3,10 +3,10 @@
 
 namespace Parser {
 
-template <typename T> Parser<T> constant(T const &value);
+template <typename T, typename E> Parser<T, E> constant(T const &value);
 
-Parser<Token> satisfy(std::function<bool(Token)> check);
+Parser<Token, ParserError> satisfy(std::function<bool(Token)> check);
 
-Parser<Token> token_kind(Token::Kind kind);
+Parser<Token, ParserError> token_kind(Token::Kind kind);
 
 };  // namespace Parser

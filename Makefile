@@ -18,7 +18,9 @@ $(TARGET): $(OBJS)
 
 clean:
 	-rm -f *.d
+	-rm -f **/*.d
 	-rm -f *.o
+	-rm -f **/*.o
 	-rm -f $(TARGET)
 
 run: $(TARGET)

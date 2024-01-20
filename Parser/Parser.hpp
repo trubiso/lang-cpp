@@ -12,11 +12,12 @@ namespace Parser {
 
 struct ParserError {};
 
-template <typename T>
-struct Parser : public std::function<Result<T, ParserError>(Stream<Token> &)> {
-	using std::function<Result<T, ParserError>(Stream<Token> &)>::function;
+template <typename T, typename E>
+struct Parser : public std::function<Result<T, E>(Stream<Token> &)> {
+	using std::function<Result<T, E>(Stream<Token> &)>::function;
 
 	typedef T value_type;
+	typedef E error_type;
 };
 
 };
