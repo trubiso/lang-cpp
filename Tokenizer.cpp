@@ -81,12 +81,21 @@ void Tokenizer::consume_whitespace() noexcept {
 	return Token{.kind = Token::Kind::NUMBER_LITERAL, .span = Span{.start = start, .end = end}};
 }
 
-[[nodiscard]] std::optional<Token> Tokenizer::consume_wrapped_literal(char wrap, Token::Kind kind) noexcept {
+[[nodiscard]] std::optional<Token> Tokenizer::consume_wrapped_literal(char wrap,
+                                                                      Token::Kind kind) noexcept {
 	size_t start = m_index;
 	advance();  // consume wrap character
 	while (is_index_valid() && current().value() != wrap) advance();
-	if (!is_index_valid()) return {};  // if we didn't reach the wrap character, there's no token
-	// TODO: log unterminated wrapped literal error
+	if (!is_index_valid()) {
+		Diagnostic diagnostic(
+		    Diagnostic::Severity::Error,
+		    kind == Token::Kind::STRING_LITERAL ? "unclosed string literal"
+		                                        : "unclosed character literal",
+		    "while trying to find the closing quote, the end of the file was found instead");
+		diagnostic.add_label(Span{.start = start, .end = m_index});
+		m_diagnostics.push_back(diagnostic);
+		return {};
+	}
 	advance();                           // consume wrap character
 	std::ignore = consume_identifier();  // just in case it ends with a postfix
 	size_t end = m_index;
@@ -105,10 +114,12 @@ void Tokenizer::consume_whitespace() noexcept {
 			break;
 		case '>':
 			if (first_char != '-' && first_char != '=') break;
-			advance(); // this is an arrow
+			advance();  // this is an arrow
 			size_t end = m_index;
-			return Token{.kind = Token::Kind::PUNCTUATION, .span = Span{.start = start, .end = end}};
+			return Token{.kind = Token::Kind::PUNCTUATION,
+			             .span = Span{.start = start, .end = end}};
 		}
+		// stops ?= from being a thing
 		if (is_index_valid() && current().value() == '=' && first_char != '?') {
 			advance();
 		}

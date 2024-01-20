@@ -1,3 +1,4 @@
+#pragma once
 #include <optional>
 #include <string>
 #include <vector>
@@ -8,9 +9,9 @@ class Diagnostic {
 public:
 	struct Label {
 		Span span;
-		std::string label;
+		std::optional<std::string> label;
 
-		Label(Span span, std::string label) : span(span), label(label) {}
+		Label(Span span, std::optional<std::string> label = {}) : span(span), label(label) {}
 	};
 
 	enum class Severity { Warning, Error };
@@ -18,7 +19,7 @@ public:
 	Diagnostic(Severity severity, std::string title, std::optional<std::string> subtitle = {})
 	    : severity(severity), title(title), subtitle(subtitle) {}
 
-	Diagnostic &add_label(Span span, std::string label);
+	Diagnostic &add_label(Span span, std::optional<std::string> label = {});
 
 	constexpr inline Severity get_severity() const { return severity; }
 

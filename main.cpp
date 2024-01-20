@@ -1,6 +1,5 @@
 #include <iostream>
 
-#include "Diagnostic.hpp"
 #include "Tokenizer.hpp"
 #include "Util.hpp"
 
@@ -13,14 +12,9 @@ int main() {
 		if (!next.has_value()) break;
 		std::cout << next.value().value(code) << std::endl;
 	}
-	Diagnostic diag1(Diagnostic::Severity::Warning, "i am warning you!!", "just so you know");
-	diag1.add_label(Span{.start = 11, .end = 28}, "oh no!")
-	    .add_label(Span{.start = 1, .end = 6}, "he")
-	    .add_label(Span{.start = 8, .end = 9}, "hee")
-	    .add_label(Span{.start = 11, .end = 26}, "your string's ugly")
-	    .add_label(Span{.start = code.size() - 3, .end = code.size() - 2}, "eugh");
-	diag1.print(&code);
-	Diagnostic diag2(Diagnostic::Severity::Error, "that was unfortunate");
-	diag2.print(&code);
+	for (auto const &diagnostic : tokenizer.diagnostics()) {
+		diagnostic.print(&code);
+	}
+	std::cout << std::endl;
 	return 0;
 }

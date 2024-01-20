@@ -8,7 +8,7 @@
 
 #define TAB_WIDTH 4
 
-Diagnostic &Diagnostic::add_label(Span span, std::string label) {
+Diagnostic &Diagnostic::add_label(Span span, std::optional<std::string> label) {
 	labels.push_back(Label(span, std::move(label)));
 	return *this;
 }
@@ -38,7 +38,7 @@ constexpr char const *severity_name(Diagnostic::Severity severity) noexcept {
 std::tuple<size_t, size_t> loc(std::string const *code, size_t idx, bool look_for_next = false) {
 	size_t l = 1;
 	size_t li = 0;
-	for (size_t i = 0; i <= idx; i++) {
+	for (size_t i = 0; i < idx; i++) {
 		if (code->at(i) == '\n') {
 			l++;
 			li = i + 1;  // seems to fix some bugs
@@ -105,7 +105,7 @@ void print_preline_labels(std::vector<Diagnostic::Label> const &things, std::str
 			std::cout << ' ';
 			j++;
 		}
-		std::cout << label.label << "\n";
+		std::cout << label.label.value() << "\n";
 
 		if (requires_last_padding) {
 			print_loc_line(loc_pad, {});
@@ -122,6 +122,7 @@ void print_labels(std::vector<Diagnostic::Label> const &labels, std::string cons
 	for (Diagnostic::Label const &label : labels) {
 		if (label.span.start < start_l) start_l = label.span.start;
 		if (label.span.end > end_l) end_l = label.span.end;
+		if (!label.label.has_value()) continue;
 		size_t loc_lab;
 		std::tie(loc_lab, std::ignore) = loc(code, label.span.end);
 		if (!preline_labels.contains(loc_lab + 1))
@@ -159,8 +160,8 @@ void print_labels(std::vector<Diagnostic::Label> const &labels, std::string cons
 			std::cout << code->at(i);
 		}
 	}
+	std::cout << "\n";
 	if (preline_labels.contains(loc_end + 1)) {
-		std::cout << "\n";
 		print_preline_labels(preline_labels.at(loc_end + 1), code, loc_pad, color_fg, false);
 	}
 
