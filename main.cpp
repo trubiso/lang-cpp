@@ -2,7 +2,7 @@
 
 #include "Tokenizer/Tokenizer.hpp"
 #include "Util.hpp"
-#include "Parser/Parser.hpp"
+#include "Parser/Primitive.hpp"
 
 int main() {
 	auto code = read_file("code");
@@ -18,7 +18,7 @@ int main() {
 		diagnostic.print(&code);
 	}
 	Stream<Token> token_stream(tokens);
-	auto parsed = token_kind(Token::Kind::IDENTIFIER)(token_stream);
+	auto parsed = Parser::token_kind(Token::Kind::IDENTIFIER)(token_stream);
 	if (bool(parsed)) {
 		std::cout << std::get<Token>(parsed).value(code) << std::endl;
 	} else {
