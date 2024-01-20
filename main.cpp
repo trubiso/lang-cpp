@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "Tokenizer.hpp"
+#include "Tokenizer/Tokenizer.hpp"
 #include "Util.hpp"
-#include "Parser.hpp"
+#include "Parser/Parser.hpp"
 
 int main() {
 	auto code = read_file("code");

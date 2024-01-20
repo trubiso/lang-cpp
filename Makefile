@@ -1,4 +1,5 @@
-OBJS := main.o Token.o Tokenizer.o Util.o Diagnostic.o
+OBJS := main.o Util.o Diagnostic.o \
+	Tokenizer/Token.o Tokenizer/Tokenizer.o
 DEPS := $(OBJS:.o=.d)
 TARGET := ./out
 

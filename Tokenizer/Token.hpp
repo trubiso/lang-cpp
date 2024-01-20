@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-#include "Span.hpp"
+#include "../Span.hpp"
 
 struct Token {
 	enum class Kind {

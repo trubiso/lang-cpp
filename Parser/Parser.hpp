@@ -1,9 +1,9 @@
 #include <expected>
 #include <functional>
 
-#include "Result.hpp"
-#include "Stream.hpp"
-#include "Token.hpp"
+#include "../Result.hpp"
+#include "../Stream.hpp"
+#include "../Tokenizer/Token.hpp"
 
 // thanks to https://github.com/Qqwy/cpp-parser_combinators
 

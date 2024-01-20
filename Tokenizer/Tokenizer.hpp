@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-#include "Diagnostic.hpp"
+#include "../Diagnostic.hpp"
 #include "Token.hpp"
 
 class Tokenizer {
