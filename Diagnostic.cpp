@@ -9,12 +9,12 @@
 #define TAB_WIDTH 4
 
 Diagnostic &Diagnostic::add_label(Span span, std::optional<std::string> label) {
-	labels.push_back(Label(span, std::move(label)));
+	m_labels.push_back(Label(span, std::move(label)));
 	return *this;
 }
 
 constexpr uint8_t diagnostic_color(Diagnostic const &diagnostic) noexcept {
-	switch (diagnostic.get_severity()) {
+	switch (diagnostic.severity()) {
 	case Diagnostic::Severity::Warning:
 		return 220;
 	case Diagnostic::Severity::Error:
@@ -175,25 +175,25 @@ void Diagnostic::print(std::string const *code) const {
 	// Severity
 	out_fmt_bold();
 	out_fmt_color_fg(color_fg);
-	std::cout << severity_name(severity) << ":";
+	std::cout << severity_name(m_severity) << ":";
 	out_fmt_reset();
 	std::cout << " ";
 
 	// Title
 	out_fmt_bold();
-	std::cout << title << "\n";
+	std::cout << m_title << "\n";
 	out_fmt_reset();
 
 	// Subtitle
-	if (subtitle.has_value()) {
+	if (m_subtitle.has_value()) {
 		out_fmt_italic();
-		std::cout << subtitle.value() << "\n";
+		std::cout << m_subtitle.value() << "\n";
 		out_fmt_reset();
 	}
 
 	// Labels
-	if (labels.size() > 0) {
-		print_labels(labels, code, color_fg);
+	if (m_labels.size() > 0) {
+		print_labels(m_labels, code, color_fg);
 	}
 
 	std::cout << std::endl;
