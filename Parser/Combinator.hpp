@@ -29,10 +29,13 @@ template <typename T, typename E, typename F>
 auto transform_error(Parser<T, E> const &parser, F const &function)
     -> Parser<T, decltype(function(std::declval<E>()))>;
 
-template <typename T1, typename E1, typename T2, typename E2>
-auto operator>>(Parser<T1, E1> const &a, Parser<T2, E2> const &b)
-    -> Parser<typename decltype(Result<T1, E1>() + Result<T2, E2>())::value_type,
-              typename decltype(Result<T1, E1>() + Result<T2, E2>())::error_type>;
+// (A & B).first
+template <typename T1, typename T2, typename E>
+Parser<T1, E> operator<<(Parser<T1, E> const &a, Parser<T2, E> const &b);
+
+// (A & B).second
+template <typename T1, typename T2, typename E>
+Parser<T2, E> operator>>(Parser<T1, E> const &a, Parser<T2, E> const &b);
 
 /// @brief Runs the first parser. If it succeeds, return that value. Otherwise, run the second
 /// parser. If it succeeds, return that value. Otherwise, return a combination of both errors.

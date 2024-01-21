@@ -2,6 +2,7 @@
 
 #include "Parser/Combinator.hpp"
 #include "Parser/Primitive.hpp"
+#include "Parser/HighOrderCombinator.hpp"
 #include "Tokenizer/Tokenizer.hpp"
 #include "Util.hpp"
 

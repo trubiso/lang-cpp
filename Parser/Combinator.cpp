@@ -26,17 +26,18 @@ auto transform_error(Parser<T, E> const &parser, F const &function)
 	};
 }
 
-template <typename T1, typename E1, typename T2, typename E2>
-auto operator>>(Parser<T1, E1> const &a, Parser<T2, E2> const &b)
-    -> Parser<typename decltype(Result<T1, E1>() + Result<T2, E2>())::value_type,
-              typename decltype(Result<T1, E1>() + Result<T2, E2>())::error_type> {
-	return [=](Stream<Token> &input) -> decltype(Result<T1, E1>() + Result<T2, E2>()) {
-		Result<T1, E1> result_a = a(input);
-		if (!bool(result_a)) return std::get<E1>(result_a);
-		Result<T2, E2> result_b = b(input);
-		if (!bool(result_b)) return std::get<E2>(result_b);
-		return result_a + result_b;
-	};
+template <typename T1, typename T2, typename E>
+Parser<T1, E> operator<<(Parser<T1, E> const &a, Parser<T2, E> const &b) {
+	return transform(a & b, [](std::tuple<T1, T2> value) {
+		return value.first;
+	});
+}
+
+template <typename T1, typename T2, typename E>
+Parser<T2, E> operator>>(Parser<T1, E> const &a, Parser<T2, E> const &b) {
+	return transform(a & b, [](std::tuple<T1, T2> value) {
+		return value.second;
+	});
 }
 
 template <typename T, typename E>

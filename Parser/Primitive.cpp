@@ -28,6 +28,7 @@ Parser<Token, ParserError> token_keyword(Token::Keyword keyword) {
 	switch (keyword) {
 	case Token::Keyword::LET:
 		desired = "let";
+		break;
 	default:
 		throw "???";
 	}
