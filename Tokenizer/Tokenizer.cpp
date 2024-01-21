@@ -20,12 +20,12 @@
 	case '&':
 	case '|':
 	case '^':
-	case '~':
+	case '~':  // (~= is disallowed)
 	case '=':
 	case '<':
 	case '>':
 	case '!':
-	case '?':  // FIXME: disallow ?= (what even is that)
+	case '?':  // (?= is disallowed)
 		return consume_operator();
 	case '(':
 	case ')':
@@ -54,7 +54,8 @@ void Tokenizer::consume_whitespace() noexcept {
 		advance();
 	}
 	size_t end = m_index;
-	return Token{.kind = Token::Kind::IDENTIFIER, .span = Span{.start = start, .end = end}};
+	Span span = Span{.start = start, .end = end};
+	return Token{.kind = Token::Kind::IDENTIFIER, .span = span, .value = span.value(*m_source)};
 }
 
 [[nodiscard]] std::optional<Token> Tokenizer::consume_number_literal() noexcept {
@@ -78,7 +79,8 @@ void Tokenizer::consume_whitespace() noexcept {
 		advance();
 	std::ignore = consume_identifier();  // just in case it ends with a postfix
 	size_t end = m_index;
-	return Token{.kind = Token::Kind::NUMBER_LITERAL, .span = Span{.start = start, .end = end}};
+	Span span = Span{.start = start, .end = end};
+	return Token{.kind = Token::Kind::NUMBER_LITERAL, .span = span, .value = span.value(*m_source)};
 }
 
 [[nodiscard]] std::optional<Token> Tokenizer::consume_wrapped_literal(char wrap,
@@ -99,7 +101,102 @@ void Tokenizer::consume_whitespace() noexcept {
 	advance();                           // consume wrap character
 	std::ignore = consume_identifier();  // just in case it ends with a postfix
 	size_t end = m_index;
-	return Token{.kind = kind, .span = Span{.start = start, .end = end}};
+	Span span = Span{.start = start, .end = end};
+	return Token{.kind = kind, .span = span, .value = span.value(*m_source)};
+}
+
+Token::Operator char_to_operator(char c) noexcept {
+	using enum Token::Operator;
+	switch (c) {
+	case '+':
+		return PLUS;
+	case '-':
+		return NEG;
+	case '*':
+		return STAR;
+	case '/':
+		return DIV;
+	case '&':
+		return AMP;
+	case '|':
+		return BAR;
+	case '^':
+		return CARET;
+	case '~':
+		return TILDE;
+	case '=':
+		return EQ;
+	case '<':
+		return LT;
+	case '>':
+		return GT;
+	case '!':
+		return BANG;
+	case '?':
+		return QUESTION;
+	default:
+		[[assume(false)]];
+	}
+}
+
+Token::Operator add_eq(Token::Operator op) noexcept {
+	using enum Token::Operator;
+	switch (op) {
+	case PLUS:
+		return PLUS_EQ;
+	case NEG:
+		return NEG_EQ;
+	case STAR:
+		return STAR_EQ;
+	case DIV:
+		return DIV_EQ;
+	case AMP:
+		return AMP_EQ;
+	case AMP_AMP:
+		return AMP_AMP_EQ;
+	case BAR:
+		return BAR_EQ;
+	case BAR_BAR:
+		return BAR_BAR_EQ;
+	case CARET:
+		return CARET_EQ;
+	case EQ:
+		return EQ_EQ;
+	case LT:
+		return LT_EQ;
+	case GT:
+		return GT_EQ;
+	case BANG:
+		return BANG_EQ;
+	default:
+		[[assume(false)]];
+	}
+}
+
+Token::Operator span_to_operator(Span span, std::string const *source) {
+	Token::Operator first_char = char_to_operator(source->at(span.start));
+	if (span.end <= span.start + 1) {  // <= just in case
+		return first_char;
+	}
+	Token::Operator second_char = char_to_operator(source->at(span.start + 1));
+	switch (second_char) {
+	case Token::Operator::BAR:
+		first_char = Token::Operator::BAR_BAR;
+		if (span.start + 2 < span.end) second_char = Token::Operator::EQ;
+		break;
+	case Token::Operator::AMP:
+		first_char = Token::Operator::AMP_AMP;
+		if (span.start + 2 < span.end) second_char = Token::Operator::EQ;
+		break;
+	default:
+		break;
+	}
+	switch (second_char) {
+	case Token::Operator::EQ:
+		return add_eq(first_char);
+	default:
+		return first_char;
+	}
 }
 
 [[nodiscard]] std::optional<Token> Tokenizer::consume_operator() noexcept {
@@ -116,30 +213,71 @@ void Tokenizer::consume_whitespace() noexcept {
 			if (first_char != '-' && first_char != '=') break;
 			advance();  // this is an arrow
 			size_t end = m_index;
-			return Token{.kind = Token::Kind::PUNCTUATION,
-			             .span = Span{.start = start, .end = end}};
+			Span span = Span{.start = start, .end = end};
+			Token::Punctuation value =
+			    first_char == '-' ? Token::Punctuation::ARROW : Token::Punctuation::FAT_ARROW;
+			return Token{.kind = Token::Kind::PUNCTUATION, .span = span, .value = value};
 		}
-		// stops ?= from being a thing
-		if (is_index_valid() && current().value() == '=' && first_char != '?') {
-			advance();
-		}
+		// stops ?= or ~= from being tokenized
+		if (first_char != '?' && first_char != '~')
+			if (is_index_valid() && current().value() == '=') {
+				advance();
+			}
 	}
 	size_t end = m_index;
-	return Token{.kind = Token::Kind::OPERATOR, .span = Span{.start = start, .end = end}};
+	Span span = Span{.start = start, .end = end};
+	Token::Operator value = span_to_operator(span, m_source);
+	return Token{.kind = Token::Kind::OPERATOR, .span = span, .value = value};
+}
+
+Token::Punctuation char_to_punctuation(char c) noexcept {
+	using enum Token::Punctuation;
+	switch (c) {
+	case '(':
+		return L_PAREN;
+	case ')':
+		return R_PAREN;
+	case '[':
+		return L_BRACKET;
+	case ']':
+		return R_BRACKET;
+	case '{':
+		return L_BRACE;
+	case '}':
+		return R_BRACE;
+	case '.':
+		return DOT;
+	case ',':
+		return COMMA;
+	case ':':
+		return COLON;
+	case ';':
+		return SEMICOLON;
+	default:
+		[[assume(false)]];
+	}
 }
 
 [[nodiscard]] std::optional<Token> Tokenizer::consume_punctuation() noexcept {
 	size_t start = m_index;
 	char first_char = current().value();
+	Token::Punctuation value = char_to_punctuation(first_char);
 	advance();  // consume the first punctuation symbol
 	if (is_index_valid()) {
 		switch (current().value()) {
 		case ':':
 		case '.':
-			if (first_char == current().value()) advance();
+			if (first_char == current().value()) {
+				if (first_char == ':')
+					value = Token::Punctuation::COLON_COLON;
+				else
+					value = Token::Punctuation::DOT_DOT;
+				advance();
+			}
 			break;
 		}
 	}
 	size_t end = m_index;
-	return Token{.kind = Token::Kind::PUNCTUATION, .span = Span{.start = start, .end = end}};
+	Span span = Span{.start = start, .end = end};
+	return Token{.kind = Token::Kind::PUNCTUATION, .span = span, .value = value};
 }

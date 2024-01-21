@@ -1,9 +1,9 @@
 #include <iostream>
 
+#include "Parser/Combinator.hpp"
+#include "Parser/Primitive.hpp"
 #include "Tokenizer/Tokenizer.hpp"
 #include "Util.hpp"
-#include "Parser/Primitive.hpp"
-#include "Parser/Combinator.hpp"
 
 int main() {
 	auto code = read_file("code");
@@ -21,11 +21,12 @@ int main() {
 	Stream<Token> token_stream(tokens);
 	auto parsed = Parser::token_kind(Token::Kind::IDENTIFIER)(token_stream);
 	if (bool(parsed)) {
-		std::cout << std::get<Token>(parsed).value(code) << std::endl;
+		auto token = std::get<Token>(parsed);
+		std::cout << std::get<std::string>(token.value) << std::endl;
 	} else {
 		std::cout << "Error" << std::endl;
 	}
-	
+
 	std::cout << std::endl;
 	return 0;
 }
