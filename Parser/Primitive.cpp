@@ -2,10 +2,6 @@
 
 namespace Parser {
 
-template <typename T, typename E> Parser<T, E> constant(T const &value) {
-	return [=](Stream<Token> &) { return value; };
-}
-
 Parser<Token, ParserError> satisfy(std::function<bool(Token const &)> check) {
 	return [=](Stream<Token> &input) -> Result<Token, ParserError> {
 		Token const &value = input.peek();
