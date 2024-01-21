@@ -50,9 +50,26 @@ Parser<T, E> operator|(Parser<T, E> const &lhs, Parser<T, E> const &rhs) {
 	};
 }
 
-template <typename T, typename E>
-Parser<std::optional<T>, E> optional(Parser<T, E> const &parser) {
+template <typename T, typename E> Parser<std::optional<T>, E> optional(Parser<T, E> const &parser) {
 	return parser() | constant<std::optional<T>, E>(std::nullopt);
+}
+
+template <typename T1, typename T2, typename E>
+Parser<std::tuple<T1, T2>, E> operator&(Parser<T1, E> const &a, Parser<T2, E> const &b) {
+	return [=](Stream<Token> &input) -> Result<std::tuple<T1, T2>, E> {
+		size_t original_index = input.index();
+		Result<T1, E> result_a = a(input);
+		if (!bool(result_a)) {
+			input.set_index(original_index);
+			return std::get<E>(result_a);
+		}
+		Result<T2, E> result_b = b(input);
+		if (!bool(result_b)) {
+			input.set_index(original_index);
+			return std::get<E>(result_b);
+		}
+		return {std::get<T1>(result_a), std::get<T2>(result_b)};
+	};
 }
 
 };  // namespace Parser
