@@ -20,7 +20,7 @@ int main() {
 		diagnostic.print(&code);
 	}
 	Stream<Token> token_stream(tokens);
-	auto parsed = Parser::token_kind(Token::Kind::IDENTIFIER)(token_stream);
+	auto parsed = Parser::parenthesized(Parser::token_kind(Token::Kind::IDENTIFIER))(token_stream);
 	if (bool(parsed)) {
 		auto token = std::get<Token>(parsed);
 		std::cout << std::get<std::string>(token.value) << std::endl;
