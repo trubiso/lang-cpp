@@ -39,6 +39,59 @@ auto transform_error(Parser<T, E> const &parser, F const &function)
 	};
 }
 
+// Filter function returns nothing if the item passes, otherwise returns an error
+template <typename T, typename E>
+Parser<T, E> filter(Parser<T, E> const &parser,
+                    std::function<std::optional<E>(T const &)> const &function) {
+	return [=](Stream<Token> &input) -> Result<T, E> {
+		size_t original_index = input.index();
+		Result<T, E> result = parser(input);
+		if (!bool(result)) return std::get<E>(result);
+		std::optional<E> transformed = function(result);
+		if (!transformed.has_value()) return std::get<T>(result);
+		input.set_index(original_index);
+		return transformed.value();
+	};
+}
+
+// parses the parser as many times as it can
+template <typename T, typename E> Parser<std::vector<T>, void> many(Parser<T, E> const &parser) {
+	return [=](Stream<Token> &input) -> Result<std::vector<T>, void> {
+		std::vector<T> elements{};
+		while (true) {
+			Result<T, E> element = parser(input);
+			if (!bool(element)) return elements;
+			elements.push_back(element);
+		}
+	};
+}
+
+// many with size constraint
+template <typename T, typename E>
+Parser<std::vector<T>, E> at_least(Parser<T, E> const &parser, size_t quantity, E const &error) {
+	return filter(many(parser), [=](std::vector<T> const &element) {
+		if (element.size() >= quantity) return {};
+		return error;
+	});
+}
+
+// [parser] [separator] [parser] [...] [separator] [parser] ([separator])
+// (allows trailing)
+template <typename T1, typename T2, typename E1, typename E2>
+Parser<std::vector<T1>, void> separated(Parser<T1, E1> const &parser,
+                                        Parser<T2, E2> const &separator) {
+	return [=](Stream<Token> &input) -> Result<std::vector<T1>, void> {
+		std::vector<T1> elements{};
+		while (true) {
+			Result<T1, E1> element = parser(input);
+			if (!bool(element)) return elements;
+			elements.push_back(element);
+			Result<T2, E2> separate = separator(input);
+			if (!bool(separate)) return elements;
+		}
+	};
+}
+
 // (A & B).first
 template <typename T1, typename T2, typename E>
 Parser<T1, E> operator<<(Parser<T1, E> const &a, Parser<T2, E> const &b) {
