@@ -20,10 +20,8 @@ int main() {
 		diagnostic.print(&code);
 	}
 	Stream<Token> token_stream(tokens);
-	auto parsed = Parser::parenthesized(Parser::separated<Token, Token, Parser::ParserError,
-	                                                      Parser::ParserError, Parser::ParserError>(
-	    Parser::token_kind(Token::Kind::IDENTIFIER),
-	    Parser::token_punctuation(Token::Punctuation::COMMA)))(token_stream);
+	auto parsed = Parser::parenthesized(
+	    Parser::separated_by_comma(Parser::token_kind(Token::Kind::IDENTIFIER)))(token_stream);
 	if (bool(parsed)) {
 		auto tokens = std::get<std::vector<Token>>(parsed);
 		for (Token const &token : tokens)
