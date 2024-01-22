@@ -20,4 +20,4 @@ struct Parser : public std::function<Result<T, E>(Stream<Token> &)> {
 	typedef E error_type;
 };
 
-};
+};  // namespace Parser

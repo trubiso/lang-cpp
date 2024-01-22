@@ -37,4 +37,14 @@ inline Parser<std::vector<T>, E> separated_by_comma(Parser<T, E> const &parser) 
 	                                              token_punctuation(Token::Punctuation::COMMA));
 }
 
+/// @brief Tries to run the parser, and upon failure, returns nothing instead of failing.
+/// @tparam T The parser's value type
+/// @tparam E The parser's error type
+/// @param parser The parser
+/// @return Returns the transformed parser.
+template <typename T, typename E> Parser<std::optional<T>, E> optional(Parser<T, E> const &parser) {
+	return transform(parser, [](auto x) -> std::optional<decltype(x)> { return x; }) |
+	       constant<std::optional<T>, E>(std::nullopt);
+}
+
 };  // namespace Parser

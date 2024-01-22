@@ -47,7 +47,7 @@ Parser<T, E> filter(Parser<T, E> const &parser,
 		size_t original_index = input.index();
 		Result<T, E> result = parser(input);
 		if (!bool(result)) return std::get<E>(result);
-		std::optional<E> transformed = function(result);
+		std::optional<E> transformed = function(std::get<T>(result));
 		if (!transformed.has_value()) return std::get<T>(result);
 		input.set_index(original_index);
 		return transformed.value();
@@ -79,7 +79,7 @@ Parser<std::vector<T>, E> at_least(Parser<T, E> const &parser, size_t quantity, 
 // (allows trailing)
 template <typename T1, typename T2, typename E1, typename E2, typename EO>
 Parser<std::vector<T1>, EO> separated(Parser<T1, E1> const &parser,
-                                        Parser<T2, E2> const &separator) {
+                                      Parser<T2, E2> const &separator) {
 	return [=](Stream<Token> &input) -> Result<std::vector<T1>, EO> {
 		std::vector<T1> elements{};
 		while (true) {
@@ -90,6 +90,12 @@ Parser<std::vector<T1>, EO> separated(Parser<T1, E1> const &parser,
 			if (!bool(separate)) return elements;
 		}
 	};
+}
+
+template <typename T1, typename T2, typename E>
+inline Parser<std::vector<T1>, E> separated(Parser<T1, E> const &parser,
+                                            Parser<T2, E> const &separator) {
+	return separated<T1, T2, E, E, E>(parser, separator);
 }
 
 // (A & B).first
@@ -118,17 +124,10 @@ Parser<T, E> operator|(Parser<T, E> const &lhs, Parser<T, E> const &rhs) {
 		if (bool(result_a)) return result_a;
 		Result<T, E> result_b = rhs(input);
 		if (bool(result_b)) return result_b;
-		return std::get<E>(result_a) + std::get<E>(result_b);
+		// TODO: fix
+		return ParserError{};
+		// return std::get<E>(result_a) + std::get<E>(result_b);
 	};
-}
-
-/// @brief Tries to run the parser, and upon failure, returns nothing instead of failing.
-/// @tparam T The parser's value type
-/// @tparam E The parser's error type
-/// @param parser The parser
-/// @return Returns the transformed parser.
-template <typename T, typename E> Parser<std::optional<T>, E> optional(Parser<T, E> const &parser) {
-	return parser() | constant<std::optional<T>, E>(std::nullopt);
 }
 
 /// @brief Tries to run both parsers sequentially. If any one of them fails, it returns the first
