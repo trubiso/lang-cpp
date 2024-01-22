@@ -61,7 +61,7 @@ template <typename T, typename E> Parser<std::vector<T>, void> many(Parser<T, E>
 		while (true) {
 			Result<T, E> element = parser(input);
 			if (!bool(element)) return elements;
-			elements.push_back(element);
+			elements.push_back(std::get<T>(element));
 		}
 	};
 }
@@ -77,15 +77,15 @@ Parser<std::vector<T>, E> at_least(Parser<T, E> const &parser, size_t quantity, 
 
 // [parser] [separator] [parser] [...] [separator] [parser] ([separator])
 // (allows trailing)
-template <typename T1, typename T2, typename E1, typename E2>
-Parser<std::vector<T1>, void> separated(Parser<T1, E1> const &parser,
+template <typename T1, typename T2, typename E1, typename E2, typename EO>
+Parser<std::vector<T1>, EO> separated(Parser<T1, E1> const &parser,
                                         Parser<T2, E2> const &separator) {
-	return [=](Stream<Token> &input) -> Result<std::vector<T1>, void> {
+	return [=](Stream<Token> &input) -> Result<std::vector<T1>, EO> {
 		std::vector<T1> elements{};
 		while (true) {
 			Result<T1, E1> element = parser(input);
 			if (!bool(element)) return elements;
-			elements.push_back(element);
+			elements.push_back(std::get<T1>(element));
 			Result<T2, E2> separate = separator(input);
 			if (!bool(separate)) return elements;
 		}

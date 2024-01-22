@@ -1,8 +1,8 @@
 #include <iostream>
 
 #include "Parser/Combinator.hpp"
-#include "Parser/Primitive.hpp"
 #include "Parser/HighOrderCombinator.hpp"
+#include "Parser/Primitive.hpp"
 #include "Tokenizer/Tokenizer.hpp"
 #include "Util.hpp"
 
@@ -20,10 +20,14 @@ int main() {
 		diagnostic.print(&code);
 	}
 	Stream<Token> token_stream(tokens);
-	auto parsed = Parser::parenthesized(Parser::token_kind(Token::Kind::IDENTIFIER))(token_stream);
+	auto parsed = Parser::parenthesized(Parser::separated<Token, Token, Parser::ParserError,
+	                                                      Parser::ParserError, Parser::ParserError>(
+	    Parser::token_kind(Token::Kind::IDENTIFIER),
+	    Parser::token_punctuation(Token::Punctuation::COMMA)))(token_stream);
 	if (bool(parsed)) {
-		auto token = std::get<Token>(parsed);
-		std::cout << std::get<std::string>(token.value) << std::endl;
+		auto tokens = std::get<std::vector<Token>>(parsed);
+		for (Token const &token : tokens)
+			std::cout << std::get<std::string>(token.value) << std::endl;
 	} else {
 		std::cout << "Error" << std::endl;
 	}
