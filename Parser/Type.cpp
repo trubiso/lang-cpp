@@ -2,30 +2,45 @@
 
 namespace Parser {
 
-Parser<Identifier, ParserError> type_identified() { return qualified_identifier(); }
+Parser<Type, ParserError> type_identified() {
+	return transform(qualified_identifier(), [](Identifier const &identifier) {
+		return Type{.kind = Type::Kind::IDENTIFIED, .value = identifier};
+	});
+}
 
-Parser<Type::BuiltIn, ParserError> type_built_in() {
+Parser<Type, ParserError> type_built_in() {
 	// TODO: do
 	return [](...) { return ParserError{}; };
 };
 
-Parser<Type::Generic, ParserError> type_generic() {
-	return transform(type() & angled(separated_by_comma(type())),
-	                 [](std::tuple<Type, std::vector<Type>> const &data) {
-		                 Type const &base = std::get<0>(data);
-		                 std::vector<Type> const &generics = std::get<1>(data);
-		                 auto value = Type::Generic{
-		                     .base = std::make_unique<Type>(base),
-		                     .generics = generics,
-		                 };
-		                 return Type{
-		                     .kind = Type::Kind::GENERIC,
-		                     .value = value,
-		                 };
-	                 });
+Parser<Type, ParserError> type_generic() {
+	auto inner = type() & angled(separated_by_comma(type()));
+	return transform(inner, [](std::tuple<Type, std::vector<Type>> const &data) {
+		Type const &base = std::get<0>(data);
+		std::vector<Type> const &generics = std::get<1>(data);
+		return Type{
+		    .kind = Type::Kind::GENERIC,
+		    .value = (decltype(Type::value))(Type::Generic{
+		        .base = base,
+		        .generics = generics,
+		    }),
+		};
+	});
 }
-Parser<void, ParserError> type_inferred();
+Parser<Type, ParserError> type_inferred() {
+	auto filtered = filter<Identifier, ParserError>(
+	    qualified_identifier(), [](Identifier const &identifier) -> std::optional<ParserError> {
+		    if (identifier.kind != Identifier::Kind::UNQUALIFIED) return ParserError{};
+		    if (std::get<std::string>(identifier.value) != "_") return ParserError{};
+		    return {};
+	    });
+	return transform(filtered, [](Identifier const &) {
+		return Type{.kind = Type::Kind::INFERRED, .value = std::monostate{}};
+	});
+}
 
-Parser<Type, ParserError> type();
+Parser<Type, ParserError> type() {
+	return type_inferred() | type_generic() | type_built_in() | type_identified();
+}
 
 };  // namespace Parser
