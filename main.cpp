@@ -4,6 +4,7 @@
 #include "Parser/HighOrderCombinator.hpp"
 #include "Parser/Primitive.hpp"
 #include "Tokenizer/Tokenizer.hpp"
+#include "Parser/Type.hpp"
 #include "Util.hpp"
 
 int main() {
