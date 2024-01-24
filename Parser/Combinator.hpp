@@ -5,6 +5,12 @@
 
 namespace Parser {
 
+#define lazy(parser)                                              \
+	Parser<typename std::decay_t<decltype(parser)>::value_type,   \
+	       typename std::decay_t<decltype(parser)>::error_type> { \
+		[=](Stream<Token> &input) { return (parser)(input); }     \
+	}
+
 /// @brief Transforms a parser's value output through the provided function.
 /// @tparam T The parser's original value type
 /// @tparam E The parser's error type
@@ -55,8 +61,9 @@ Parser<T, E> filter(Parser<T, E> const &parser,
 }
 
 // parses the parser as many times as it can
-template <typename T, typename E> Parser<std::vector<T>, void> many(Parser<T, E> const &parser) {
-	return [=](Stream<Token> &input) -> Result<std::vector<T>, void> {
+template <typename T, typename E>
+Parser<std::vector<T>, ParserError> many(Parser<T, E> const &parser) {
+	return [=](Stream<Token> &input) -> Result<std::vector<T>, ParserError> {
 		std::vector<T> elements{};
 		while (true) {
 			Result<T, E> element = parser(input);

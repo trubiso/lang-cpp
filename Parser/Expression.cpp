@@ -27,11 +27,32 @@ Parser<Expression, ParserError> expression_identifier() {
 
 Parser<Expression, ParserError> expression_atom() {
 	return expression_identifier() | expression_number_literal() | expression_string_literal() |
-	       expression_char_literal();
+	       expression_char_literal() | lazy(parenthesized(expression()));
 }
 
 // TODO: we require foldl and foldr
-Parser<Expression, ParserError> expression_binary_operation();
+#define BINARY_OPERATOR(OP, NEXT)                                                               \
+	transform(                                                                                  \
+	    NEXT &many(OP &NEXT),                                                                   \
+	    [](std::tuple<Expression, std::vector<std::tuple<Token::Operator, Expression>>> const   \
+	           &data) {                                                                         \
+		    Expression l = std::get<0>(data);                                                   \
+		    for (std::tuple<Token::Operator, Expression> const &pair : std::get<1>(data)) {     \
+			    Token::Operator const &operator_ = std::get<0>(pair);                           \
+			    Expression const &r = std::get<1>(pair);                                        \
+			    Expression::BinaryOperation operation =                                         \
+			        Expression::BinaryOperation{.l = l, .r = r, .operator_ = operator_};        \
+			    l = Expression{.kind = Expression::Kind::BINARY_OPERATION, .value = operation}; \
+		    }                                                                                   \
+		    return l;                                                                           \
+	    })
+
+Parser<Expression, ParserError> expression_binary_operation() {
+	// TODO: this is ugly
+	auto plus = token_operator(Token::Operator::PLUS) >> constant(Token::Operator::PLUS);
+	auto x = BINARY_OPERATOR(plus, expression());
+}
+
 Parser<Expression, ParserError> expression_unary_operation();
 
 Parser<Expression, ParserError> expression() {

@@ -3,7 +3,7 @@
 
 namespace Parser {
 
-template <typename T, typename E> inline Parser<T, E> constant(T const &value) {
+template <typename T, typename E = ParserError> inline Parser<T, E> constant(T const &value) {
 	return [=](Stream<Token> &) { return value; };
 }
 
