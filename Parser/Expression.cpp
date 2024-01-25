@@ -30,7 +30,6 @@ Parser<Expression, ParserError> expression_atom() {
 	       expression_char_literal() | lazy(parenthesized(expression()));
 }
 
-// TODO: we require foldl and foldr
 #define BINARY_OPERATOR(OP, NEXT)                                                               \
 	transform(                                                                                  \
 	    NEXT &many(OP &NEXT),                                                                   \
@@ -40,11 +39,21 @@ Parser<Expression, ParserError> expression_atom() {
 		    for (std::tuple<Token::Operator, Expression> const &pair : std::get<1>(data)) {     \
 			    Token::Operator const &operator_ = std::get<0>(pair);                           \
 			    Expression const &r = std::get<1>(pair);                                        \
-			    Expression::BinaryOperation operation =                                         \
-			        Expression::BinaryOperation{.l = l, .r = r, .operator_ = operator_};        \
+			    Expression::BinaryOperation operation{.l = l, .r = r, .operator_ = operator_};  \
 			    l = Expression{.kind = Expression::Kind::BINARY_OPERATION, .value = operation}; \
 		    }                                                                                   \
 		    return l;                                                                           \
+	    })
+
+#define UNARY_OPERATION(OP, NEXT)                                                               \
+	transform(                                                                                  \
+	    many(OP) & NEXT, [](std::tuple<std::vector<Token::Operator>, Expression> const &data) { \
+		    Expression r = std::get<1>(data);                                                   \
+		    for (Token::Operator const &operator_ : std::get<0>(data)) {                        \
+			    Expression::UnaryOperation operation{.value = r, .operator_ = operator_};       \
+			    r = Expression{.kind = Expression::Kind::UNARY_OPERATION, .value = operation};  \
+		    }                                                                                   \
+		    return r;                                                                           \
 	    })
 
 #define OPERATOR(OP) token_operator(OP) >> constant(OP)
@@ -55,7 +64,8 @@ Parser<Expression, ParserError> expression() {
 	auto plus_neg = OPERATOR(PLUS) | OPERATOR(NEG);
 	auto star_div = OPERATOR(STAR) | OPERATOR(DIV);
 
-	auto binary_star_div = BINARY_OPERATOR(star_div, expression_atom());
+	auto unary_neg = UNARY_OPERATION(neg, expression_atom());
+	auto binary_star_div = BINARY_OPERATOR(star_div, unary_neg);
 	auto binary_plus_neg = BINARY_OPERATOR(plus_neg, binary_star_div);
 
 	return binary_plus_neg;

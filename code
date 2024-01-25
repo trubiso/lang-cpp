@@ -1,4 +1,4 @@
-1 + 2 - (2 * 3) * 4
+1 + 2 - (2 * 3) * -4
 xe->help();
 let a = 3.14159; let b = 0xdead_beef.fbfbfp7;
 let c = 0.5f32;
