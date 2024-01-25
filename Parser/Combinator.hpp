@@ -140,9 +140,9 @@ template <typename T1, typename T2, typename E>
 Parser<std::variant<T1, T2>, E> operator|(Parser<T1, E> const &lhs, Parser<T2, E> const &rhs) {
 	return [=](Stream<Token> &input) -> Result<std::variant<T1, T2>, E> {
 		Result<T1, E> result_a = lhs(input);
-		if (bool(result_a)) return result_a;
+		if (bool(result_a)) return std::get<T1>(result_a);
 		Result<T2, E> result_b = rhs(input);
-		if (bool(result_b)) return result_b;
+		if (bool(result_b)) return std::get<T2>(result_b);
 		// TODO: fix
 		return ParserError{};
 		// return std::get<E>(result_a) + std::get<E>(result_b);
