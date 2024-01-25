@@ -46,9 +46,11 @@ auto transform_error(Parser<T, E> const &parser, F const &function)
 }
 
 // Filter function returns nothing if the item passes, otherwise returns an error
-template <typename T, typename E>
-Parser<T, E> filter(Parser<T, E> const &parser,
-                    std::function<std::optional<E>(T const &)> const &function) {
+// Function should be std::function<std::optional<E>(T const &)>
+template <typename T, typename E, typename F>
+    requires std::is_same_v<decltype(std::declval<F>()(std::declval<T const &>())),
+                            std::optional<E>>
+Parser<T, E> filter(Parser<T, E> const &parser, F const &function) {
 	return [=](Stream<Token> &input) -> Result<T, E> {
 		size_t original_index = input.index();
 		Result<T, E> result = parser(input);

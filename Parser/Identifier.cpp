@@ -13,15 +13,14 @@ Parser<Identifier, ParserError> qualified_identifier() {
 	// TODO: disallow trailing (e.g., `a::b::` parses)
 	auto dot_dot = token_punctuation(Token::Punctuation::DOT_DOT);
 	auto inner = optional(dot_dot) & separated(token_identifier(), dot_dot);
-	auto filtered = filter<std::tuple<std::optional<Token>, std::vector<Token>>, ParserError>(
-	    inner,
-	    [](std::tuple<std::optional<Token>, std::vector<Token>> const &data)
-	        -> std::optional<ParserError> {
-		    std::vector<Token> const &qualified_path = std::get<1>(data);
-		    // TODO: fix;
-		    if (qualified_path.empty()) return ParserError{};
-		    return {};
-	    });
+	auto filtered = filter(inner,
+	                       [](std::tuple<std::optional<Token>, std::vector<Token>> const &data)
+	                           -> std::optional<ParserError> {
+		                       std::vector<Token> const &qualified_path = std::get<1>(data);
+		                       // TODO: fix;
+		                       if (qualified_path.empty()) return ParserError{};
+		                       return {};
+	                       });
 	return transform(
 	    filtered,
 	    [](std::tuple<std::optional<Token>, std::vector<Token>> const &data) -> Identifier {
