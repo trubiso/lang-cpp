@@ -86,25 +86,21 @@ Parser<std::vector<T>, E> at_least(Parser<T, E> const &parser, size_t quantity, 
 
 // [parser] [separator] [parser] [...] [separator] [parser] ([separator])
 // (allows trailing)
-template <typename T1, typename T2, typename E1, typename E2, typename EO = ParserError>
-Parser<std::vector<T1>, EO> separated(Parser<T1, E1> const &parser,
+template <typename T1, typename T2, typename E1, typename E2>
+Parser<std::vector<T1>, E1> separated(Parser<T1, E1> const &parser,
                                       Parser<T2, E2> const &separator) {
-	return [=](Stream<Token> &input) -> Result<std::vector<T1>, EO> {
-		std::vector<T1> elements{};
-		while (true) {
-			Result<T1, E1> element = parser(input);
-			if (!bool(element)) return elements;
-			elements.push_back(std::get<T1>(element));
-			Result<T2, E2> separate = separator(input);
-			if (!bool(separate)) return elements;
-		}
-	};
+	return many(parser << separator);
 }
 
-template <typename T1, typename T2, typename E>
-inline Parser<std::vector<T1>, E> separated(Parser<T1, E> const &parser,
-                                            Parser<T2, E> const &separator) {
-	return separated<T1, T2, E, E, E>(parser, separator);
+template <typename T1, typename T2, typename E1, typename E2>
+Parser<std::vector<T1>, E1> separated_no_trailing(Parser<T1, E1> const &parser,
+                                                  Parser<T2, E2> const &separator) {
+	return transform(parser & many(parser >> separator),
+	                 [](std::tuple<T1, std::vector<T1>> const &data) {
+		                 std::vector<T1> new_data = std::get<1>(data);
+		                 new_data.push_back(std::get<0>(data));
+		                 return new_data;
+	                 });
 }
 
 // (A & B).first

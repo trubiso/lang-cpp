@@ -12,7 +12,7 @@ Parser<Identifier, ParserError> identifier() {
 Parser<Identifier, ParserError> qualified_identifier() {
 	// TODO: disallow trailing (e.g., `a::b::` parses)
 	auto dot_dot = token_punctuation(Token::Punctuation::DOT_DOT);
-	auto inner = optional(dot_dot) & separated(token_identifier(), dot_dot);
+	auto inner = optional(dot_dot) & separated_no_trailing(token_identifier(), dot_dot);
 	auto filtered = filter(inner,
 	                       [](std::tuple<std::optional<Token>, std::vector<Token>> const &data)
 	                           -> std::optional<ParserError> {

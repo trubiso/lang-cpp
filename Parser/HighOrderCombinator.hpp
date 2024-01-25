@@ -33,8 +33,7 @@ template <typename T, typename E> inline Parser<T, E> angled(Parser<T, E> const 
 
 template <typename T, typename E>
 inline Parser<std::vector<T>, E> separated_by_comma(Parser<T, E> const &parser) {
-	return separated<T, Token, E, ParserError, E>(parser,
-	                                              token_punctuation(Token::Punctuation::COMMA));
+	return separated(parser, token_punctuation(Token::Punctuation::COMMA));
 }
 
 /// @brief Tries to run the parser, and upon failure, returns nothing instead of failing.
