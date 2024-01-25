@@ -1,3 +1,4 @@
+#pragma once
 #include "Identifier.hpp"
 #include "Type.hpp"
 #include "Expression.hpp"
@@ -19,6 +20,7 @@ struct Statement {
 	std::variant<Create> value;
 };
 
+// FIXME: _ x = ... doesn't work
 Parser<Statement, ParserError> statement_create();
 
 Parser<Statement, ParserError> statement();

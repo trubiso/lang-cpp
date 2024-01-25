@@ -13,8 +13,10 @@ Parser<Type, ParserError> type_built_in() {
 	return [](...) { return ParserError{}; };
 };
 
+// TODO: fix this so it can be used. use a mechanism similar to expressions where the other 3 are
+// atoms
 Parser<Type, ParserError> type_generic() {
-	auto inner = type() & angled(separated_by_comma(type()));
+	auto inner = lazy(type()) & angled(separated_by_comma(lazy(type())));
 	return transform(inner, [](std::tuple<Type, std::vector<Type>> const &data) {
 		Type const &base = std::get<0>(data);
 		std::vector<Type> const &generics = std::get<1>(data);
@@ -41,8 +43,6 @@ Parser<Type, ParserError> type_inferred() {
 	});
 }
 
-Parser<Type, ParserError> type() {
-	return type_inferred() | type_generic() | type_built_in() | type_identified();
-}
+Parser<Type, ParserError> type() { return type_inferred() | type_built_in() | type_identified(); }
 
 };  // namespace Parser

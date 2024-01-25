@@ -4,10 +4,11 @@ namespace Parser {
 
 Parser<Token, ParserError> satisfy(std::function<bool(Token const &)> check) {
 	return [=](Stream<Token> &input) -> Result<Token, ParserError> {
-		Token const &value = input.peek();
-		if (check(value)) {
+		std::optional<Token> value = input.peek();
+		if (!value.has_value()) return ParserError{};
+		if (check(value.value())) {
 			input.ignore();
-			return value;
+			return value.value();
 		} else {
 			// TODO: fix
 			return ParserError{};

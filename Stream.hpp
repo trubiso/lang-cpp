@@ -1,11 +1,14 @@
+#include <optional>
 #include <vector>
 
-template <typename T>
-class Stream {
+template <typename T> class Stream {
 public:
 	Stream(std::vector<T> data) : m_data(data), m_index(0) {}
 
-	constexpr inline T const &peek() const { return m_data.at(m_index); }
+	constexpr inline std::optional<T> peek() const {
+		if (m_index >= m_data.size()) return {};
+		return m_data.at(m_index);
+	}
 	inline void ignore() { m_index++; }
 
 	inline size_t index() const { return m_index; }
