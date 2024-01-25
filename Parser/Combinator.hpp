@@ -86,7 +86,7 @@ Parser<std::vector<T>, E> at_least(Parser<T, E> const &parser, size_t quantity, 
 
 // [parser] [separator] [parser] [...] [separator] [parser] ([separator])
 // (allows trailing)
-template <typename T1, typename T2, typename E1, typename E2, typename EO>
+template <typename T1, typename T2, typename E1, typename E2, typename EO = ParserError>
 Parser<std::vector<T1>, EO> separated(Parser<T1, E1> const &parser,
                                       Parser<T2, E2> const &separator) {
 	return [=](Stream<Token> &input) -> Result<std::vector<T1>, EO> {
@@ -132,6 +132,20 @@ Parser<T, E> operator|(Parser<T, E> const &lhs, Parser<T, E> const &rhs) {
 		Result<T, E> result_a = lhs(input);
 		if (bool(result_a)) return result_a;
 		Result<T, E> result_b = rhs(input);
+		if (bool(result_b)) return result_b;
+		// TODO: fix
+		return ParserError{};
+		// return std::get<E>(result_a) + std::get<E>(result_b);
+	};
+}
+
+// same but with different t1, t2
+template <typename T1, typename T2, typename E>
+Parser<std::variant<T1, T2>, E> operator|(Parser<T1, E> const &lhs, Parser<T2, E> const &rhs) {
+	return [=](Stream<Token> &input) -> Result<std::variant<T1, T2>, E> {
+		Result<T1, E> result_a = lhs(input);
+		if (bool(result_a)) return result_a;
+		Result<T2, E> result_b = rhs(input);
 		if (bool(result_b)) return result_b;
 		// TODO: fix
 		return ParserError{};
