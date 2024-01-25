@@ -47,16 +47,18 @@ Parser<Expression, ParserError> expression_atom() {
 		    return l;                                                                           \
 	    })
 
-Parser<Expression, ParserError> expression_binary_operation() {
-	// TODO: this is ugly
-	auto plus = token_operator(Token::Operator::PLUS) >> constant(Token::Operator::PLUS);
-	auto x = BINARY_OPERATOR(plus, expression());
-}
-
-Parser<Expression, ParserError> expression_unary_operation();
+#define OPERATOR(OP) token_operator(OP) >> constant(OP)
 
 Parser<Expression, ParserError> expression() {
-	return expression_binary_operation() | expression_unary_operation() | expression_atom();
+	using enum Token::Operator;
+	auto neg = OPERATOR(NEG);
+	auto plus_neg = OPERATOR(PLUS) | OPERATOR(NEG);
+	auto star_div = OPERATOR(STAR) | OPERATOR(DIV);
+
+	auto binary_star_div = BINARY_OPERATOR(star_div, expression_atom());
+	auto binary_plus_neg = BINARY_OPERATOR(plus_neg, binary_star_div);
+
+	return binary_plus_neg;
 }
 
 };  // namespace Parser

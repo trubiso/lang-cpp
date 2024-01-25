@@ -1,3 +1,4 @@
+#pragma once
 #include <memory>
 
 // thanks to https://www.foonathan.net/2022/05/recursive-variant-box/

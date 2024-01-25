@@ -38,9 +38,6 @@ Parser<Expression, ParserError> expression_number_literal();
 Parser<Expression, ParserError> expression_identifier();
 Parser<Expression, ParserError> expression_atom();
 
-Parser<Expression, ParserError> expression_binary_operation();
-Parser<Expression, ParserError> expression_unary_operation();
-
 Parser<Expression, ParserError> expression();
 
 };  // namespace Parser
