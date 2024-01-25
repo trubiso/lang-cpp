@@ -7,8 +7,7 @@ Parser<Statement, ParserError> statement_create() {
 	auto i = identifier();
 	auto o = token_operator(Token::Operator::EQ);
 	auto r = expression();
-	auto stmt = ((t & i) << o) & r;
-	// TODO: transform
+	auto stmt = (t & i) << o & r;
 	return transform(
 	    stmt,
 	    [](std::tuple<std::tuple<std::variant<Token, Type>, Identifier>, Expression> const &data) {
@@ -30,7 +29,9 @@ Parser<Statement, ParserError> statement_create() {
 }
 
 Parser<Statement, ParserError> statement() {
-	return statement_create();  // TODO: the rest of them
+	auto statement = statement_create();  // TODO: the rest of them
+	return statement << at_least(token_punctuation(Token::Punctuation::SEMICOLON), 1,
+	                             ParserError{});
 }
 
 };  // namespace Parser
