@@ -78,7 +78,7 @@ Parser<std::vector<T>, ParserError> many(Parser<T, E> const &parser) {
 // many with size constraint
 template <typename T, typename E>
 Parser<std::vector<T>, E> at_least(Parser<T, E> const &parser, size_t quantity, E const &error) {
-	return filter(many(parser), [=](std::vector<T> const &element) {
+	return filter(many(parser), [=](std::vector<T> const &element) -> std::optional<E> {
 		if (element.size() >= quantity) return {};
 		return error;
 	});
