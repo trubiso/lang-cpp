@@ -62,7 +62,7 @@ void print_loc_line(size_t loc_pad, std::optional<size_t> loc_curr) {
 		std::cout << std::string(loc_pad, ' ');
 	else {
 		auto size = std::to_string(loc_curr.value()).size();
-		if (size <= loc_pad) std::cout << std::string(loc_pad - size + 1, ' ');
+		if (size <= loc_pad) std::cout << std::string(loc_pad - size, ' ');
 		std::cout << loc_curr.value();
 	}
 	std::cout << " │ ";
