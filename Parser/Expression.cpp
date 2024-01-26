@@ -30,6 +30,25 @@ Parser<Expression, ParserError> expression_atom() {
 	       expression_char_literal() | lazy(parenthesized(expression()));
 }
 
+Parser<Expression, ParserError> expression_call() {
+	auto call = optional(angled(separated_by_comma(type()))) &
+	            parenthesized(separated_by_comma(expression_atom()));
+	return transform(
+	    expression_atom() & many(call),
+	    [](std::tuple<Expression, std::vector<std::tuple<std::optional<std::vector<Type>>,
+	                                                     std::vector<Expression>>>> const &data) {
+		    Expression l = std::get<0>(data);
+		    for (std::tuple<std::optional<std::vector<Type>>, std::vector<Expression>> const &pair :
+		         std::get<1>(data)) {
+			    std::vector<Type> const &generics = std::get<0>(pair).value_or(std::vector<Type>{});
+			    std::vector<Expression> const &arguments = std::get<1>(pair);
+			    Expression::Call call{.callee = l, .generics = generics, .arguments = arguments};
+			    l = Expression{.kind = Expression::Kind::CALL, .value = call};
+		    }
+		    return l;
+	    });
+}
+
 #define BINARY_OPERATOR(OP, NEXT)                                                               \
 	transform(                                                                                  \
 	    NEXT &many(OP &NEXT),                                                                   \
@@ -64,7 +83,7 @@ Parser<Expression, ParserError> expression() {
 	auto plus_neg = OPERATOR(PLUS) | OPERATOR(NEG);
 	auto star_div = OPERATOR(STAR) | OPERATOR(DIV);
 
-	auto unary_neg = UNARY_OPERATION(neg, expression_atom());
+	auto unary_neg = UNARY_OPERATION(neg, expression_call());
 	auto binary_star_div = BINARY_OPERATOR(star_div, unary_neg);
 	auto binary_plus_neg = BINARY_OPERATOR(plus_neg, binary_star_div);
 

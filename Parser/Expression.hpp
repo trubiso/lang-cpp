@@ -4,6 +4,7 @@
 
 #include "../Box.hpp"
 #include "Identifier.hpp"
+#include "Type.hpp"
 
 namespace Parser {
 
@@ -16,6 +17,7 @@ struct Expression {
 		IDENTIFIER,
 		BINARY_OPERATION,
 		UNARY_OPERATION,
+		CALL,
 	};
 
 	struct BinaryOperation {
@@ -29,8 +31,14 @@ struct Expression {
 		Token::Operator operator_;
 	};
 
+	struct Call {
+		Box<Expression> callee;
+		std::vector<Type> generics;
+		std::vector<Expression> arguments;
+	};
+
 	Kind kind;
-	std::variant<std::string, Identifier, BinaryOperation, UnaryOperation> value;
+	std::variant<std::string, Identifier, BinaryOperation, UnaryOperation, Call> value;
 };
 
 Parser<Expression, ParserError> expression_char_literal();
@@ -38,6 +46,8 @@ Parser<Expression, ParserError> expression_string_literal();
 Parser<Expression, ParserError> expression_number_literal();
 Parser<Expression, ParserError> expression_identifier();
 Parser<Expression, ParserError> expression_atom();
+
+Parser<Expression, ParserError> expression_call();
 
 Parser<Expression, ParserError> expression();
 

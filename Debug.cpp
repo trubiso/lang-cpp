@@ -1,7 +1,5 @@
 #include "Debug.hpp"
 
-#include <iostream>
-
 void debug(Parser::Statement const &statement) {
 	using enum Parser::Statement::Kind;
 	switch (statement.kind) {
@@ -81,7 +79,7 @@ void debug(Parser::Expression const &expression) {
 		std::cout << "number " << std::get<std::string>(expression.value);
 		break;
 	case IDENTIFIER:
-		std::cout << "identifier";
+		debug(std::get<Parser::Identifier>(expression.value));
 		break;
 	case BINARY_OPERATION: {
 		auto const &operation = std::get<Parser::Expression::BinaryOperation>(expression.value);
@@ -100,6 +98,16 @@ void debug(Parser::Expression const &expression) {
 		std::cout << " ";
 		debug(*operation.value);
 		std::cout << ")";
+	} break;
+	case CALL: {
+		auto const &call = std::get<Parser::Expression::Call>(expression.value);
+		std::cout << "[call (";
+		debug(*call.callee);
+		std::cout << ") with generics <";
+		debug(call.generics);
+		std::cout << "> and arguments (";
+		debug(call.arguments);
+		std::cout << ")]";
 	} break;
 	}
 }
