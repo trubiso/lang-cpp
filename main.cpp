@@ -26,7 +26,8 @@ int main() {
 	} else {
 		auto error = std::get<Parser::ParserError>(parsed);
 		Diagnostic diag(Diagnostic::Severity::Error, "could not parse", error.message);
-		diag.add_label(error.span);
+		diag.add_label(Span{.start = tokens.at(error.span.start).span.start,
+		                    .end = tokens.at(error.span.start).span.end});
 		diag.print(&code);
 	}
 

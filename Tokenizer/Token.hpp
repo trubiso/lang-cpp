@@ -69,3 +69,8 @@ struct Token {
 	Span span;
 	std::variant<std::string, Operator, Punctuation> value;
 };
+
+char const *get_variant_name(Token::Kind);
+char const *get_variant_name(Token::Keyword);
+char const *get_variant_name(Token::Operator);
+char const *get_variant_name(Token::Punctuation);

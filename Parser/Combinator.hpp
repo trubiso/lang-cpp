@@ -91,16 +91,16 @@ Parser<std::vector<T>, E> at_least(Parser<T, E> const &parser, size_t quantity, 
 template <typename T1, typename T2, typename E1, typename E2>
 Parser<std::vector<T1>, E1> separated(Parser<T1, E1> const &parser,
                                       Parser<T2, E2> const &separator) {
-	return many(parser << separator);
+	return separated_no_trailing(parser, separator) << optional(separator);
 }
 
 template <typename T1, typename T2, typename E1, typename E2>
 Parser<std::vector<T1>, E1> separated_no_trailing(Parser<T1, E1> const &parser,
                                                   Parser<T2, E2> const &separator) {
-	return transform(parser & many(parser >> separator),
+	return transform(parser & many(separator >> parser),
 	                 [](std::tuple<T1, std::vector<T1>> const &data) {
 		                 std::vector<T1> new_data = std::get<1>(data);
-		                 new_data.push_back(std::get<0>(data));
+		                 new_data.insert(new_data.begin(), std::get<0>(data));
 		                 return new_data;
 	                 });
 }

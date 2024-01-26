@@ -1,7 +1,5 @@
 #include "Identifier.hpp"
 
-#include <iostream>
-
 namespace Parser {
 
 Parser<Identifier, ParserError> identifier() {
@@ -12,14 +10,14 @@ Parser<Identifier, ParserError> identifier() {
 };
 
 Parser<Identifier, ParserError> qualified_identifier() {
-	auto dot_dot = token_punctuation(Token::Punctuation::DOT_DOT);
-	auto inner = optional(dot_dot) & separated_no_trailing(token_identifier(), dot_dot);
+	auto colon_colon = token_punctuation(Token::Punctuation::COLON_COLON);
+	auto inner = optional(colon_colon) & separated_no_trailing(token_identifier(), colon_colon);
 	auto filtered = filter(inner,
 	                       [](std::tuple<std::optional<Token>, std::vector<Token>> const &data)
 	                           -> std::optional<std::string> {
 		                       std::vector<Token> const &qualified_path = std::get<1>(data);
 		                       // TODO: fix;
-		                       if (qualified_path.empty()) return "???";
+		                       if (qualified_path.empty()) return "empty qualified path";
 		                       return {};
 	                       });
 	return transform(
