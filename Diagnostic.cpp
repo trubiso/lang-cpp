@@ -49,6 +49,7 @@ std::tuple<size_t, size_t> loc(std::string const *code, size_t idx, bool look_fo
 		for (size_t i = idx + 1; i < code->size(); i++) {
 			if (code->at(i) == '\n') {
 				li = i;
+				break;
 			}
 		}
 		if (old_li == li) li = code->size();
@@ -134,7 +135,6 @@ void print_labels(std::vector<Diagnostic::Label> const &labels, std::string cons
 
 	auto [loc_start, start] = loc(code, start_l);
 	auto [loc_end, end] = loc(code, end_l - 1, true);
-	// FIXME: why does end go all the way to the end
 	size_t loc_pad = std::to_string(loc_end).size();
 	size_t loc_curr = loc_start;
 

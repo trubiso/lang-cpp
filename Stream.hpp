@@ -7,7 +7,7 @@ public:
 
 	constexpr inline std::optional<T> at(size_t index) const {
 		if (index >= m_data.size()) return {};
-		return m_data.at(m_index);
+		return m_data.at(index);
 	}
 	constexpr inline std::optional<T> peek() const { return at(m_index); }
 	inline void ignore() { m_index++; }
