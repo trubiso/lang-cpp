@@ -134,6 +134,7 @@ void print_labels(std::vector<Diagnostic::Label> const &labels, std::string cons
 
 	auto [loc_start, start] = loc(code, start_l);
 	auto [loc_end, end] = loc(code, end_l - 1, true);
+	// FIXME: why does end go all the way to the end
 	size_t loc_pad = std::to_string(loc_end).size();
 	size_t loc_curr = loc_start;
 

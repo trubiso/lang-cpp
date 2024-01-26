@@ -57,7 +57,7 @@ Parser<T, E> filter(Parser<T, E> const &parser, F const &function) {
 		if (!bool(result)) return std::get<E>(result);
 		std::optional<std::string> transformed = function(std::get<T>(result));
 		if (!transformed.has_value()) return std::get<T>(result);
-		ParserError error{.span = Span{.start = original_index, .end = input.index()},
+		ParserError error{.span = make_span(input, original_index, input.index()),
 		                  .message = transformed.value()};
 		input.set_index(original_index);
 		return error;
@@ -132,7 +132,7 @@ Parser<T, E> operator|(Parser<T, E> const &lhs, Parser<T, E> const &rhs) {
 		Result<T, E> result_b = rhs(input);
 		if (bool(result_b)) return result_b;
 		return ParserError{
-		    .span = Span{.start = input.index(), .end = input.index() + 1},
+		    .span = make_span(input, input.index(), input.index()),
 		    .message = std::get<E>(result_a).message + " or " + std::get<E>(result_b).message};
 	};
 }
@@ -146,7 +146,7 @@ Parser<std::variant<T1, T2>, E> operator|(Parser<T1, E> const &lhs, Parser<T2, E
 		Result<T2, E> result_b = rhs(input);
 		if (bool(result_b)) return std::get<T2>(result_b);
 		return ParserError{
-		    .span = Span{.start = input.index(), .end = input.index() + 1},
+		    .span = make_span(input, input.index(), input.index()),
 		    .message = std::get<E>(result_a).message + " or " + std::get<E>(result_b).message};
 	};
 }

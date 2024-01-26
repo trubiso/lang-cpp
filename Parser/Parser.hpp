@@ -23,4 +23,6 @@ struct Parser : public std::function<Result<T, E>(Stream<Token> &)> {
 	typedef E error_type;
 };
 
+Span make_span(Stream<Token> const &input, size_t start_index, size_t end_index);
+
 };  // namespace Parser
