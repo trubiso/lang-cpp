@@ -10,7 +10,10 @@
 
 namespace Parser {
 
-struct ParserError {};
+struct ParserError {
+	Span span;
+	std::string message;
+};
 
 template <typename T, typename E>
 struct Parser : public std::function<Result<T, E>(Stream<Token> &)> {

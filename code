@@ -1,4 +1,4 @@
-john x = 1 + 2 - (2 * 3) * -4 + do;
+let x = ::do::it;
 xe->help();
 let a = 3.14159; let b = 0xdead_beef.fbfbfp7;
 let c = 0.5f32;

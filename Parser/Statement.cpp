@@ -30,8 +30,8 @@ Parser<Statement, ParserError> statement_create() {
 
 Parser<Statement, ParserError> statement() {
 	auto statement = statement_create();  // TODO: the rest of them
-	return statement << at_least(token_punctuation(Token::Punctuation::SEMICOLON), 1,
-	                             ParserError{});
+	return statement << at_least(token_punctuation(Token::Punctuation::SEMICOLON), 0,
+	                             "couldn't find semicolon");
 }
 
 };  // namespace Parser

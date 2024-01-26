@@ -49,16 +49,18 @@ auto transform_error(Parser<T, E> const &parser, F const &function)
 // Function should be std::function<std::optional<E>(T const &)>
 template <typename T, typename E, typename F>
     requires std::is_same_v<decltype(std::declval<F>()(std::declval<T const &>())),
-                            std::optional<E>>
+                            std::optional<std::string>>
 Parser<T, E> filter(Parser<T, E> const &parser, F const &function) {
 	return [=](Stream<Token> &input) -> Result<T, E> {
 		size_t original_index = input.index();
 		Result<T, E> result = parser(input);
 		if (!bool(result)) return std::get<E>(result);
-		std::optional<E> transformed = function(std::get<T>(result));
+		std::optional<std::string> transformed = function(std::get<T>(result));
 		if (!transformed.has_value()) return std::get<T>(result);
+		ParserError error{.span = Span{.start = original_index, .end = input.index()},
+		                  .message = transformed.value()};
 		input.set_index(original_index);
-		return transformed.value();
+		return error;
 	};
 }
 
@@ -77,8 +79,8 @@ Parser<std::vector<T>, ParserError> many(Parser<T, E> const &parser) {
 
 // many with size constraint
 template <typename T, typename E>
-Parser<std::vector<T>, E> at_least(Parser<T, E> const &parser, size_t quantity, E const &error) {
-	return filter(many(parser), [=](std::vector<T> const &element) -> std::optional<E> {
+Parser<std::vector<T>, E> at_least(Parser<T, E> const &parser, size_t quantity, std::string error) {
+	return filter(many(parser), [=](std::vector<T> const &element) -> std::optional<std::string> {
 		if (element.size() >= quantity) return {};
 		return error;
 	});
@@ -129,9 +131,9 @@ Parser<T, E> operator|(Parser<T, E> const &lhs, Parser<T, E> const &rhs) {
 		if (bool(result_a)) return result_a;
 		Result<T, E> result_b = rhs(input);
 		if (bool(result_b)) return result_b;
-		// TODO: fix
-		return ParserError{};
-		// return std::get<E>(result_a) + std::get<E>(result_b);
+		return ParserError{
+		    .span = Span{.start = input.index(), .end = input.index() + 1},
+		    .message = std::get<E>(result_a).message + " or " + std::get<E>(result_b).message};
 	};
 }
 
@@ -143,9 +145,9 @@ Parser<std::variant<T1, T2>, E> operator|(Parser<T1, E> const &lhs, Parser<T2, E
 		if (bool(result_a)) return std::get<T1>(result_a);
 		Result<T2, E> result_b = rhs(input);
 		if (bool(result_b)) return std::get<T2>(result_b);
-		// TODO: fix
-		return ParserError{};
-		// return std::get<E>(result_a) + std::get<E>(result_b);
+		return ParserError{
+		    .span = Span{.start = input.index(), .end = input.index() + 1},
+		    .message = std::get<E>(result_a).message + " or " + std::get<E>(result_b).message};
 	};
 }
 

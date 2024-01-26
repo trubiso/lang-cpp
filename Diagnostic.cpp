@@ -38,7 +38,7 @@ constexpr char const *severity_name(Diagnostic::Severity severity) noexcept {
 std::tuple<size_t, size_t> loc(std::string const *code, size_t idx, bool look_for_next = false) {
 	size_t l = 1;
 	size_t li = 0;
-	for (size_t i = 0; i < idx; i++) {
+	for (size_t i = 0; i < std::min(idx, code->size()); i++) {
 		if (code->at(i) == '\n') {
 			l++;
 			li = i + 1;  // seems to fix some bugs

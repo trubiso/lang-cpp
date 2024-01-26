@@ -24,7 +24,10 @@ int main() {
 		auto value = std::get<Parser::Statement>(parsed);
 		debug(value);
 	} else {
-		std::cout << "Error" << std::endl;
+		auto error = std::get<Parser::ParserError>(parsed);
+		Diagnostic diag(Diagnostic::Severity::Error, "could not parse", error.message);
+		diag.add_label(error.span);
+		diag.print(&code);
 	}
 
 	std::cout << std::endl;

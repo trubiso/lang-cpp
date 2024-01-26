@@ -30,14 +30,14 @@ Parser<Type, ParserError> type_generic() {
 	});
 }
 Parser<Type, ParserError> type_inferred() {
-	auto filtered = filter(qualified_identifier(),
-	                       [](Identifier const &identifier) -> std::optional<ParserError> {
-		                       if (identifier.kind != Identifier::Kind::UNQUALIFIED)
-			                       return ParserError{};
-		                       if (std::get<std::string>(identifier.value) != "_")
-			                       return ParserError{};
-		                       return {};
-	                       });
+	auto filtered = filter(
+	    qualified_identifier(), [](Identifier const &identifier) -> std::optional<std::string> {
+		    if (identifier.kind != Identifier::Kind::UNQUALIFIED)
+			    return "couldn't find unqualified identifier while searching for a discarded type";
+		    if (std::get<std::string>(identifier.value) != "_")
+			    return "incorrect name for discarded type";
+		    return {};
+	    });
 	return transform(filtered, [](Identifier const &) {
 		return Type{.kind = Type::Kind::INFERRED, .value = std::monostate{}};
 	});
