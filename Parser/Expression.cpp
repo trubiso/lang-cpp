@@ -32,7 +32,7 @@ Parser<Expression, ParserError> expression_atom() {
 
 Parser<Expression, ParserError> expression_call() {
 	auto call = optional(angled(separated_by_comma(type()))) &
-	            parenthesized(separated_by_comma(expression_atom()));
+	            lazy(parenthesized(separated_by_comma(expression())));
 	return transform(
 	    expression_atom() & many(call),
 	    [](std::tuple<Expression, std::vector<std::tuple<std::optional<std::vector<Type>>,
