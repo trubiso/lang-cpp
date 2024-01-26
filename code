@@ -1,14 +1,5 @@
-::john::is::my baby = x<i32, i64>(1 + 3, 2);
-xe->help();
-let a = 3.14159; let b = 0xdead_beef.fbfbfp7;
+::john::is::my baby = x<i32, i64>(1 + 3, 2 * (4 + 3) * 5);
+let a = 3.14159; let b = 0xdead_beef;
 let c = 0.5f32;
 let d = "";
 let k = 9;
-
-
-bib""
-''
-
-
-hcdsj
-

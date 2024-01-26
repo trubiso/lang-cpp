@@ -19,16 +19,21 @@ int main() {
 		diagnostic.print(&code);
 	}
 	Stream<Token> token_stream(tokens);
-	auto parsed = Parser::statement()(token_stream);
-	if (bool(parsed)) {
-		auto value = std::get<Parser::Statement>(parsed);
-		debug(value);
-	} else {
-		auto error = std::get<Parser::ParserError>(parsed);
-		Diagnostic diag(Diagnostic::Severity::Error, "could not parse", error.message);
-		diag.add_label(Span{.start = tokens.at(error.span.start).span.start,
-		                    .end = tokens.at(error.span.start).span.end});
-		diag.print(&code);
+	while (true) {
+		auto parsed = Parser::statement()(token_stream);
+		if (bool(parsed)) {
+			auto value = std::get<Parser::Statement>(parsed);
+			debug(value);
+			std::cout << std::endl;
+		} else {
+			auto error = std::get<Parser::ParserError>(parsed);
+			Diagnostic diag(Diagnostic::Severity::Error, "could not parse", error.message);
+			if (error.span.start < tokens.size())
+				diag.add_label(Span{.start = tokens.at(error.span.start).span.start,
+				                    .end = tokens.at(error.span.start).span.end});
+			diag.print(&code);
+			break;
+		}
 	}
 
 	std::cout << std::endl;
